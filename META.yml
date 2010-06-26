@@ -18,4 +18,4 @@ requires:
 resources:
   homepage: http://github.com/ido50/Brannigan/tree
   repository: git://github.com/ido50/Brannigan.git
-version: 0.1
+version: 0.2

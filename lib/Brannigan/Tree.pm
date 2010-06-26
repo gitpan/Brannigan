@@ -1,6 +1,6 @@
 package Brannigan::Tree;
 BEGIN {
-  $Brannigan::Tree::VERSION = '0.1';
+  $Brannigan::Tree::VERSION = '0.2';
 }
 
 use strict;
@@ -13,7 +13,7 @@ Brannigan::Tree - A Brannigan validation/parsing scheme tree, possibly built fro
 
 =head1 VERSION
 
-version 0.1
+version 0.2
 
 =head1 DESCRIPTION
 
