@@ -1,0 +1,21 @@
+---
+abstract: 'Easy, flexible system for validating and parsing input, mainly targeted at web applications.'
+author:
+  - 'Ido Perlmuter <ido@ido50.net>'
+build_requires:
+  Test::More: 0
+configure_requires:
+  ExtUtils::MakeMaker: 6.31
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 4.101740, CPAN::Meta::Converter version 2.101670'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Brannigan
+requires:
+  DateTime::Format::ISO8601: 0
+resources:
+  homepage: http://github.com/ido50/Brannigan/tree
+  repository: git://github.com/ido50/Brannigan.git
+version: 0.1

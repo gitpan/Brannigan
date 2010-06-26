@@ -1,0 +1,16 @@
+Changes
+LICENSE
+MANIFEST
+MANIFEST.SKIP
+META.yml
+Makefile.PL
+README
+dist.ini
+lib/Brannigan.pm
+lib/Brannigan/Tree.pm
+lib/Brannigan/Validations.pm
+t/00-load.t
+t/01-simple.t
+t/manifest.t
+t/release-pod-coverage.t
+t/release-pod-syntax.t
