@@ -1,5 +1,5 @@
 ---
-abstract: 'Easy, flexible system for validating and parsing input, mainly targeted at web applications.'
+abstract: 'Comprehensive, flexible system for validating and parsing input, mainly targeted at web applications.'
 author:
   - 'Ido Perlmuter <ido@ido50.net>'
 build_requires:
@@ -13,9 +13,7 @@ meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
 name: Brannigan
-requires:
-  DateTime::Format::ISO8601: 0
 resources:
   homepage: http://github.com/ido50/Brannigan/tree
   repository: git://github.com/ido50/Brannigan.git
-version: 0.2
+version: 0.3

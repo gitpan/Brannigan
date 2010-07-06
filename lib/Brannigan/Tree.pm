@@ -1,6 +1,6 @@
 package Brannigan::Tree;
 BEGIN {
-  $Brannigan::Tree::VERSION = '0.2';
+  $Brannigan::Tree::VERSION = '0.3';
 }
 
 use strict;
@@ -13,25 +13,27 @@ Brannigan::Tree - A Brannigan validation/parsing scheme tree, possibly built fro
 
 =head1 VERSION
 
-version 0.2
+version 0.3
 
 =head1 DESCRIPTION
 
 This module is used internally by L<Brannigan>. Basically, a tree is a
 validation/parsing scheme in its "final", workable structure, taking
 any inherited schemes into account. The actual validation and parsing
-of input is done in this module.
+of input is done by this module.
 
 =head1 MODULES
 
-=head2 new( $tree )
+=head2 new( $scheme | @schemes )
 
-Creates a new Brannigan::Tree instance.
+Creates a new Brannigan::Tree instance from one or more schemes.
 
 =cut
 
 sub new {
-	bless pop, shift;
+	my $class = shift;
+
+	return bless $class->_merge_trees(@_), $class;
 }
 
 =head2 process( \%params )
@@ -47,98 +49,376 @@ sub process {
 
 	# validate the data
 	my $data = {};
-	my $rejects = $self->validate($params);
+
+	my $rejects = $self->validate($params, $self->{params});
 	$data->{_rejects} = $rejects if $rejects;
+
+	my $prs = $self->parse($params, $self->{params}, $self->{groups});
+	foreach (keys %$prs) {
+		$data->{$_} = $prs->{$_};
+	}
+
+	return $data;
+}
+
+=head2 validate( \%params )
+
+Validates the hash-ref of input parameters and returns a hash-ref of rejects
+(i.e. failed validation methods) for each parameter.
+
+=cut
+
+sub validate {
+	my ($self, $params, $rules) = @_;
+
+	my $rejects;
+
+	# go over all the parameters and validate them
+	foreach (keys %$params) {
+		# find references to this parameter, first in regexes, then direct
+		# give preference to the direct references
+		my @references;
+		push(@references, $rules->{_all}) if $rules->{_all};
+		foreach my $param (keys %$rules) {
+			next unless $param =~ m!^/([^/]+)/$!;
+			my $re = qr/$1/;
+			push(@references, $rules->{$param}) if m/$re/;
+		}
+		push(@references, $rules->{$_}) if $rules->{$_};
+
+		my $rj = $self->_validate_param($_, $params->{$_}, $self->_merge_trees(@references));
+
+		$rejects->{$_} = $rj if $rj;
+	}
+
+	# find required parameters that aren't there
+	foreach (keys %$rules) {
+		next if $_ eq '_all';
+		next if m!^/[^/]+/$!;
+		$rejects->{$_} = ['required(1)'] if $rules->{$_}->{required} && (!defined $params->{$_} || $params->{$_} eq '');
+	}
+
+	return $rejects;
+}
+
+=head2 parse( \%params, \%param_rules, [\%group_rules] )
+
+Receives a hash-ref of parameters, a hash-ref of parameter rules (this is
+the 'params' part of a scheme) and optionally a hash-ref of group rules
+(this is the 'groups' part of a scheme), parses the parameters according
+to these rules and returns a hash-ref of all the parameters after parsing.
+
+=cut
+
+sub parse {
+	my ($self, $params, $param_rules, $group_rules) = @_;
+
+	my $data;
+
+	# fill-in missing parameters with default values, if defined
+	foreach (keys %$param_rules) {
+		next if m!^/[^/]+/$!;
+		next unless !defined $params->{$_} || $params->{$_} eq '';
+
+		# is there a default value/method?
+		if (exists $param_rules->{$_}->{default} && ref $param_rules->{$_}->{default} eq 'CODE') {
+			$data->{$_} = $param_rules->{$_}->{default}->();
+		} elsif (exists $param_rules->{$_}->{default}) {
+			$data->{$_} = $param_rules->{$_}->{default};
+		}
+	}
 
 	# parse the data
 	foreach (keys %$params) {
+		# ignore undefined or empty values
+		next if !defined $params->{$_} || $params->{$_} eq '';
+		
 		# is there a reference to this parameter in the scheme?
-		next if !exists $self->{params}->{$_} && $self->{ignore_missing};
-
-		unless (exists $self->{params}->{$_} && $self->{ignore_missing}) {
+		my @refs;
+		foreach my $p (keys %$param_rules) {
+			next unless $p =~ m!^/([^/]+)/$!;
+			my $re = qr/$1/;
+			next unless m/$re/;
+			push(@refs, $param_rules->{$p});
+		}
+		push(@refs, $param_rules->{$_}) if $param_rules->{$_};
+		
+		next if scalar @refs == 0 && $self->{ignore_missing};
+		unless (scalar @refs && $self->{ignore_missing}) {
 			# pass the parameter as is
 			$data->{$_} = $params->{$_};
 			next;
 		}
 
-		# is there a parsing method?
-		if ($self->{params}->{$_}->{parse}) {
-			my $parsed = $self->{params}->{$_}->{parse}->($params->{$_});
-			foreach my $k (keys %$parsed) {
-				$data->{$k} = $parsed->{$k};
+		# is this a hash-ref or an array-ref or just a scalar?
+		if (ref $params->{$_} eq 'HASH') {
+			my $pd = $self->parse($params->{$_}, $self->_merge_trees(@refs)->{keys});
+			foreach my $k (keys %$pd) {
+				$data->{$_}->{$k} = $pd->{$k};
+			}
+		} elsif (ref $params->{$_} eq 'ARRAY') {
+			foreach my $val (@{$params->{$_}}) {
+				# we need to parse this value with the rules
+				# in the 'values' key
+				my $pd = $self->parse({ param => $val }, { param => $self->_merge_trees(@refs)->{values} });
+				push(@{$data->{$_}}, $pd->{param});
 			}
 		} else {
-			# just pass as-is
-			$data->{$_} = $params->{$_};
+			# is there a parsing method?
+			# first see if there's one in a regex
+			my $parse;
+			my @data = ($params->{$_});
+			foreach my $r (keys %$param_rules) {
+				next unless $r =~ m!^/([^/]+)/$!;
+				my $re = qr/$1/;
+				
+				my @matches = (m/$re/);
+				next unless scalar @matches > 0;
+				push(@data, @matches);
+
+				$parse = $param_rules->{$r}->{parse} if $param_rules->{$r}->{parse};
+			}
+			$parse = $param_rules->{$_}->{parse} if $param_rules->{$_}->{parse};
+
+			# make sure if we have a parse method that is indeed a subroutine
+			if ($parse && ref $parse eq 'CODE') {
+				my $parsed = $parse->(@data);
+				foreach my $k (keys %$parsed) {
+					if (ref $parsed->{$k} eq 'HASH') {
+						foreach my $sk (keys %{$parsed->{$k}}) {
+							$data->{$k}->{$sk} = $parsed->{$k}->{$sk};
+						}
+					} elsif (ref $parsed->{$k} eq 'ARRAY') {
+						push(@{$data->{$k}}, @{$parsed->{$k}});
+					} else {
+						$data->{$k} = $parsed->{$k};
+					}
+				}
+			} else {
+				# just pass as-is
+				$data->{$_} = $params->{$_};
+			}
 		}
 	}
 
 	# parse group data
-	foreach (keys %{$self->{groups}}) {
-		my @data;
-		foreach my $p (@{$self->{groups}->{$_}->{params}}) {
-			push(@data, $params->{$p});
-		}
-		
-		my $parsed = $self->{groups}->{$_}->{parse}->(@data);
-		foreach my $k (keys %$parsed) {
-			$data->{$k} = $parsed->{$k};
+	if ($group_rules) {
+		foreach (keys %$group_rules) {
+			my @data;
+			
+			# do we have a list of parameters, or a regular expression?
+			if (exists $group_rules->{$_}->{params}) {
+				foreach my $p (@{$group_rules->{$_}->{params}}) {
+					push(@data, $data->{$p});
+				}
+			} elsif (exists $group_rules->{$_}->{regex}) {
+				my ($re) = ($group_rules->{$_}->{regex} =~ m!^/([^/]+)/$!);
+				next unless $re;
+				$re = qr/$re/;
+				foreach my $p (keys %$data) {
+					next unless $p =~ m/$re/;
+					push(@data, $data->{$p});
+				}
+			} else {
+				# we have nothing in this group
+				next;
+			}
+			
+			# parse the data
+			my $parsed = $group_rules->{$_}->{parse}->(@data);
+			foreach my $k (keys %$parsed) {
+				if (ref $parsed->{$k} eq 'ARRAY') {
+					push(@{$data->{$k}}, @{$parsed->{$k}});
+				} elsif (ref $parsed->{$k} eq 'HASH') {
+					foreach my $sk (keys %{$parsed->{$k}}) {
+						$data->{$k}->{$sk} = $parsed->{$k}->{$sk};
+					}
+				} else {
+					$data->{$k} = $parsed->{$k};
+				}
+			}
 		}
 	}
 
 	return $data;
 }
 
-=head2 validate( \%params, [\%validations] )
+=head1 INTERNAL METHODS
 
-Validates the hash-ref of input parameters and returns a hash-ref of rejects
-(i.e. failed validation methods) for each parameter. Optionally receives
-a hash-ref of custom validation methods (incomplete feature, to be completed
-in the next release).
+=head2 _validate_param( $param, $value, \%validations )
 
-There is no need to call this method specifically, as it automatically
-called by the C<process()> method.
+Receives the name of a parameter, its value, and a hash-ref of validations
+to assert against. Returns a list of validations that failed for this
+parameter. Depending on the type of the parameter (either scalar, hash
+or array), this method will call one of the following three methods.
 
 =cut
 
-sub validate {
-	my ($self, $params, $validations) = @_;
+sub _validate_param {
+	my ($self, $param, $value, $validations) = @_;
 
-	my $rejects;
+	# is there any reference to this parameter in the scheme?
+	return undef unless $validations;
 
-	# go over all parameters
-	foreach (keys %$params) {
-		# is this parameter required? if not, and it has no value
-		# (either under or empty string), then don't bother checking
-		# any validations. if the parameter is forbidden and isn't provided,
-		# do the same
-		next unless exists $self->{params}->{$_};
-		next if !$self->{params}->{$_}->{required} && (!defined $params->{$_} || $params->{$_} eq '');
-		next if $self->{params}->{$_}->{forbidden} && (!defined $params->{$_} || $params->{$_} eq '');
+	# is this parameter required? if not, and it has no value
+	# (either undef or an empty string), then don't bother checking
+	# any validations. If yes, and it has no value, do the same.
+	return undef if !$validations->{required} && (!defined $value || $value eq '');
+	return ['required(1)'] if $validations->{required} && (!defined $value || $value eq '');
+
+	# is this parameter forbidden? if yes, and it has a value,
+	# don't bother checking any other validations.
+	return ['forbidden(1)'] if $validations->{forbidden} && defined $value && $value ne '';
+
+	# is this a scalar, array or hash parameter?
+	if ($validations->{hash}) {
+		return $self->_validate_hash($param, $value, $validations);
+	} elsif ($validations->{array}) {
+		return $self->_validate_array($param, $value, $validations);
+	} else {
+		return $self->_validate_scalar($param, $value, $validations);
+	}
+}
+
+=head2 _validate_scalar( $param, $value, \%validations, [$type] )
+
+Receives the name of a parameter, its value, and a hash-ref of validations
+to assert against. Returns a list of all failed validations for this
+parameter. If the parameter is a child of a hash/array parameter, then
+C<$type> must be provided with either 'hash' or 'array'.
+
+=cut
+
+sub _validate_scalar {
+	my ($self, $param, $value, $validations, $type) = @_;
+
+	my @rejects;
+
+	# get all validations we need to perform
+	foreach my $v (keys %$validations) {
+		# skip the parse method and the default value
+		next if $v eq 'parse' || $v eq 'default';
+		next if $type && $type eq 'array' && $v eq 'values';
+		next if $type && $type eq 'hash' && $v eq 'keys';
+
+		# get the data we're passing to the validation method
+		my @data = ref $validations->{$v} eq 'ARRAY' ? @{$validations->{$v}} : ($validations->{$v});
 		
-		# get all validations we need to perform
-		foreach my $v (keys %{$self->{params}->{$_}}) {
-			next if $v eq 'parse';
-			
-			my @data = ref $self->{params}->{$_}->{$v} eq 'ARRAY' ? @{$self->{params}->{$_}->{$v}} : ($self->{params}->{$_}->{$v});
-			
-			# which validation method are we gonna use?
-			# custom ones have preference
-			if ($v eq 'validate' && ref $self->{params}->{$_}->{$v} eq 'CODE') {
-				# this is an "inline" validation method, invoke it
-				push(@{$rejects->{$_}}, $v) unless $self->{params}->{$_}->{$v}->($params->{$_}, @data);
-			} elsif ($validations && $validations->{$v} && ref $validations->{$v} eq 'CODE') {
-				# we're using a custom validation method defined in the
-				# Brannigan object
-				push(@{$rejects->{$_}}, $v.'('.join(', ', @data).')') unless $validations->{$v}->($params->{$_}, @data);
+		# which validation method are we gonna use?
+		# custom ones have preference
+		if ($v eq 'validate' && ref $validations->{$v} eq 'CODE') {
+			# this is an "inline" validation method, invoke it
+			push(@rejects, $v) unless $validations->{$v}->($value, @data);
+		} else {
+			# we're using a built-in validation method
+			push(@rejects, $v.'('.join(', ', @data).')') unless Brannigan::Validations->$v($value, @data);
+		}
+	}
+
+	return scalar @rejects ? [@rejects] : undef;
+}
+
+=head2 _validate_array( $param, $value, \%validations )
+
+Receives the name of an array parameter, its value, and a hash-ref of validations
+to assert against. Returns a list of validations that failed for this
+parameter.
+
+=cut
+
+sub _validate_array {
+	my ($self, $param, $value, $validations) = @_;
+
+	# if this isn't an array, don't bother checking any other validation method
+	return { _self => ['array(1)'] } unless ref $value eq 'ARRAY';
+
+	# invoke validations on the parameter itself
+	my $rejects = {};
+	my $_self = $self->_validate_scalar($param, $value, $validations, 'array');
+	$rejects->{_self} = $_self if $_self;
+
+	# invoke validations on the values of the array
+	my $i = 0;
+	foreach (@$value) {
+		my $rj = $self->_validate_param("${param}[$i]", $_, $validations->{values});
+		$rejects->{$i} = $rj if $rj;
+		$i++;
+	}
+
+	return $rejects;
+}
+
+=head2 _validate_hash( $param, $value, \%validations )
+
+Receives the name of a hash parameter, its value, and a hash-ref of validations
+to assert against. Returns a list of validations that failed for this
+parameter.
+
+=cut
+
+sub _validate_hash {
+	my ($self, $param, $value, $validations) = @_;
+
+	# if this isn't a hash, don't bother checking any other validation method
+	return { _self => ['hash(1)'] } unless ref $value eq 'HASH';
+
+	# invoke validations on the parameter itself
+	my $rejects = {};
+	my $_self = $self->_validate_scalar($param, $value, $validations, 'hash');
+	$rejects->{_self} = $_self if $_self;
+
+	# invoke validations on the keys of the hash (a.k.a mini-params)
+	my $hr = $self->validate($value, $validations->{keys});
+
+	foreach (keys %$hr) {
+		$rejects->{$_} = $hr->{$_};
+	}
+
+	return scalar keys %$rejects ? $rejects : undef;
+}
+
+=head2 _merge_trees( @trees )
+
+Merges two or more hash-refs of validation/parsing trees and returns the
+resulting tree. The merge is performed in order, so trees later in the
+array (i.e. on the right) "tramp" the trees on the left.
+
+=cut
+
+sub _merge_trees {
+	my $class = shift;
+
+	return undef unless scalar @_ && (ref $_[0] eq 'HASH' || ref $_[0] eq 'Brannigan::Tree');
+
+	# the leftmost tree is the starting tree
+	my $tree = shift;
+	my %tree = %$tree;
+
+	# now for the merging business
+	foreach (@_) {
+		next unless ref $_ eq 'HASH';
+
+		foreach my $k (keys %$_) {
+			if (ref $_->{$k} eq 'HASH') {
+				unless (exists $tree{$k}) {
+					$tree{$k} = $_->{$k};
+				} else {
+					$tree{$k} = $class->_merge_trees($tree{$k}, $_->{$k});
+				}
 			} else {
-				# we're using a built-in validation method
-				push(@{$rejects->{$_}}, $v.'('.join(', ', @data).')') unless Brannigan::Validations->$v($params->{$_}, @data);
+				if ($k eq 'forbidden' && $_->{$k}) {
+					# remove required, if there was such a rule
+					delete $tree{'required'};
+				} elsif ($k eq 'required' && $_->{$k}) {
+					# remove forbidden, if there was such a rule
+					delete $tree{'forbidden'};
+				}
+				$tree{$k} = $_->{$k};
 			}
 		}
 	}
 
-	return $rejects;
+	return \%tree;
 }
 
 =head1 SEE ALSO
@@ -147,7 +427,7 @@ L<Brannigan>, L<Brannigan::Validations>.
 
 =head1 AUTHOR
 
-Ido Perlmuter, C<< <ido at ido50.net> >>
+Ido Perlmuter, C<< <ido at ido50 dot net> >>
 
 =head1 BUGS
 
@@ -182,11 +462,6 @@ L<http://cpanratings.perl.org/d/Brannigan>
 L<http://search.cpan.org/dist/Brannigan/>
 
 =back
-
-=head1 ACKNOWLEDGEMENTS
-
-Brannigan is inspired by L<Oogly> (Al Newkirk) and the "Ketchup" jQuery
-validation plugin (L<http://demos.usejquery.com/ketchup-plugin/>).
 
 =head1 LICENSE AND COPYRIGHT
 
