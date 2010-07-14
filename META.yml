@@ -16,4 +16,4 @@ name: Brannigan
 resources:
   homepage: http://github.com/ido50/Brannigan/tree
   repository: git://github.com/ido50/Brannigan.git
-version: 0.3
+version: 0.4
