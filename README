@@ -3,7 +3,7 @@ NAME
     input, mainly targeted at web applications.
 
 VERSION
-    version 0.4
+    version 0.5
 
 SYNOPSIS
     This example uses Catalyst, but should be pretty self explanatory. It's
@@ -200,7 +200,7 @@ DESCRIPTION
     base scheme, only changing whatever it is needs changing (and possibly
     adding specific properties that don't exist in the base scheme).
 
-HOW BRANNIGAN WORKS
+  HOW BRANNIGAN WORKS
     In essence, Brannigan works in three stages (which all boil down to one
     single command):
 
@@ -723,19 +723,19 @@ HOW BRANNIGAN WORKS
 
     Example schemes, input and output can be seen in Brannigan::Examples.
 
-BUILT-IN VALIDATION METHODS
+  BUILT-IN VALIDATION METHODS
     For a list of all validation methods provided by Brannigan, check
     Brannigan::Validations.
 
 METHODS
   new( \%scheme | @schemes )
     Creates a new instance of Brannigan, with the provided scheme(s) (see
-    HOW SCHEMES WORK for more info on schemes).
+    "HOW SCHEMES LOOK" for more info on schemes).
 
   process( $scheme, \%params )
     Receives the name of a scheme and a hash-ref of input parameters (or a
     data structure), and validates and parses these paremeters according to
-    the scheme (see HOW SCHEMES WORK for detailed information about this
+    the scheme (see "HOW SCHEMES LOOK" for detailed information about this
     process).
 
     Returns a hash-ref of parsed parameters according to the parsing scheme,

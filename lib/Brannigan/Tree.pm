@@ -1,6 +1,6 @@
 package Brannigan::Tree;
 BEGIN {
-  $Brannigan::Tree::VERSION = '0.4';
+  $Brannigan::Tree::VERSION = '0.5';
 }
 
 use strict;
@@ -13,7 +13,7 @@ Brannigan::Tree - A Brannigan validation/parsing scheme tree, possibly built fro
 
 =head1 VERSION
 
-version 0.4
+version 0.5
 
 =head1 DESCRIPTION
 
@@ -345,7 +345,7 @@ sub _validate_array {
 		$i++;
 	}
 
-	return $rejects;
+	return scalar keys %$rejects ? $rejects : undef;
 }
 
 =head2 _validate_hash( $param, $value, \%validations )

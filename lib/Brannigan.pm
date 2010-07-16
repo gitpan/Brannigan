@@ -1,6 +1,6 @@
 package Brannigan;
 BEGIN {
-  $Brannigan::VERSION = '0.4';
+  $Brannigan::VERSION = '0.5';
 }
 
 # ABSTRACT: Comprehensive, flexible system for validating and parsing input, mainly targeted at web applications.
@@ -15,7 +15,7 @@ Brannigan - Comprehensive, flexible system for validating and parsing input, mai
 
 =head1 VERSION
 
-version 0.4
+version 0.5
 
 =head1 SYNOPSIS
 
@@ -218,7 +218,7 @@ all the properties of the base scheme, only changing whatever it is needs
 changing (and possibly adding specific properties that don't exist in
 the base scheme).
 
-=head1 HOW BRANNIGAN WORKS
+=head2 HOW BRANNIGAN WORKS
 
 In essence, Brannigan works in three stages (which all boil down to one
 single command):
@@ -733,7 +733,7 @@ any errors. It's your job to decide what to do, and that's a good thing.
 
 Example schemes, input and output can be seen in L<Brannigan::Examples>.
 
-=head1 BUILT-IN VALIDATION METHODS
+=head2 BUILT-IN VALIDATION METHODS
 
 For a list of all validation methods provided by Brannigan, check
 L<Brannigan::Validations>.
@@ -743,7 +743,7 @@ L<Brannigan::Validations>.
 =head2 new( \%scheme | @schemes )
 
 Creates a new instance of Brannigan, with the provided scheme(s) (see
-HOW SCHEMES WORK for more info on schemes).
+L</"HOW SCHEMES LOOK"> for more info on schemes).
 
 =cut
 
@@ -759,7 +759,7 @@ sub new {
 
 Receives the name of a scheme and a hash-ref of input parameters (or a data
 structure), and validates and parses these paremeters according to the
-scheme (see HOW SCHEMES WORK for detailed information about this process).
+scheme (see L</"HOW SCHEMES LOOK"> for detailed information about this process).
 
 Returns a hash-ref of parsed parameters according to the parsing scheme,
 possibly containing a list of failed validations for each parameter.
