@@ -1,6 +1,6 @@
 package Brannigan::Validations;
 BEGIN {
-  $Brannigan::Validations::VERSION = '0.5';
+  $Brannigan::Validations::VERSION = '0.6';
 }
 
 use strict;
@@ -12,7 +12,7 @@ Brannigan::Validations - Built-in validation methods for Brannigan.
 
 =head1 VERSION
 
-version 0.5
+version 0.6
 
 =head1 DESCRIPTION
 
@@ -39,7 +39,7 @@ parameter will not be checked.
 sub required {
 	my ($class, $value, $boolean) = @_;
 
-	return undef if $boolean && !$value;
+	return undef if $boolean && !defined $value;
 
 	return 1;
 }

@@ -3,7 +3,7 @@ NAME
     input, mainly targeted at web applications.
 
 VERSION
-    version 0.5
+    version 0.6
 
 SYNOPSIS
     This example uses Catalyst, but should be pretty self explanatory. It's

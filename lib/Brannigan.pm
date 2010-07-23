@@ -1,6 +1,6 @@
 package Brannigan;
 BEGIN {
-  $Brannigan::VERSION = '0.5';
+  $Brannigan::VERSION = '0.6';
 }
 
 # ABSTRACT: Comprehensive, flexible system for validating and parsing input, mainly targeted at web applications.
@@ -15,7 +15,7 @@ Brannigan - Comprehensive, flexible system for validating and parsing input, mai
 
 =head1 VERSION
 
-version 0.5
+version 0.6
 
 =head1 SYNOPSIS
 

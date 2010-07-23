@@ -1,5 +1,8 @@
 Revision history for Brannigan
 
+0.6       2010-07-23 11:48:14 Asia/Jerusalem
+	- Fixed bug where required validation failed erroneously when value was 0
+
 0.5       2010-07-16 16:23:32 Asia/Jerusalem
 	- Fixed bug where an empty hash-ref was returned in the rejects hashref
 	  for array type parameters
