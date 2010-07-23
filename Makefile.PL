@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-
+BEGIN { require 5.006; }
 
 use ExtUtils::MakeMaker 6.31;
 
@@ -22,7 +22,7 @@ my %WriteMakefileArgs = (
   'LICENSE' => 'perl',
   'NAME' => 'Brannigan',
   'PREREQ_PM' => {},
-  'VERSION' => '0.6',
+  'VERSION' => '0.7',
   'test' => {
     'TESTS' => 't/*.t'
   }

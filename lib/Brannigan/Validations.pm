@@ -1,6 +1,6 @@
 package Brannigan::Validations;
 BEGIN {
-  $Brannigan::Validations::VERSION = '0.6';
+  $Brannigan::Validations::VERSION = '0.7';
 }
 
 use strict;
@@ -12,7 +12,7 @@ Brannigan::Validations - Built-in validation methods for Brannigan.
 
 =head1 VERSION
 
-version 0.6
+version 0.7
 
 =head1 DESCRIPTION
 
@@ -27,8 +27,15 @@ parameter's value passed the test, or a false value otherwise.
 
 =head2 required( $value, $boolean )
 
-If C<$boolean> is true, makes sure a required parameter was indeed provided,
-otherwise simply returns true.
+If C<$boolean> has a true value, this method will check that a required
+parameter was indeed provided; otherwise (i.e. if C<$boolean> is not true)
+this method will simply return a true value to indicate success.
+
+You should note that if a parameter is required, and a non-true value is
+received (i.e. 0 or the empty string ""), this method considers the
+requirement as fulfilled (i.e. it will return true). If you need to make sure
+your parameters receive true values, take a look at the C<is_true()> validation
+method.
 
 Please note that if a parameter is not required and indeed isn't provided
 with the input parameters, any other validation methods defined on the
@@ -46,8 +53,9 @@ sub required {
 
 =head2 forbidden( $value, $boolean )
 
-If C<$boolean> is true, makes sure a forbidden parameter was indeed NOT
-provided. Otherwise, a true value is returned.
+If C<$boolean> has a true value, this method will check that a forbidden
+parameter was indeed NOT provided; otherwise (i.e. if C<$boolean> has a
+false value), this method will do nothing and simply return true.
 
 =cut
 
@@ -55,6 +63,23 @@ sub forbidden {
 	my ($class, $value, $boolean) = @_;
 
 	return defined $value && $boolean ? undef : 1;
+}
+
+=head2 is_true( $value, $boolean )
+
+If C<$boolean> has a true value, this method will check that C<$value>
+has a true value (so, C<$value> cannot be 0 or the empty string); otherwise
+(i.e. if C<$boolean> has a false value), this method does nothing and
+simply returns true.
+
+=cut
+
+sub is_true {
+	my ($class, $value, $boolean) = @_;
+
+	return undef if $boolean && !$value;
+
+	return 1;
 }
 
 =head2 length_between( $value, $min_length, $max_length )

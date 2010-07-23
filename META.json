@@ -1,0 +1,44 @@
+{
+   "abstract" : "Comprehensive, flexible system for validating and parsing input, mainly targeted at web applications.",
+   "author" : [
+      "Ido Perlmuter <ido@ido50.net>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Zilla version 4.101900, CPAN::Meta::Converter version 2.101670",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Brannigan",
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "6.31"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "perl" : "5.006"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "Test::More" : 0
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "homepage" : "http://github.com/ido50/Brannigan/tree",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/ido50/Brannigan.git",
+         "web" : "http://github.com/ido50/Brannigan/tree"
+      }
+   },
+   "version" : "0.7"
+}
+
