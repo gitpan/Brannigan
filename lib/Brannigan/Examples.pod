@@ -4,7 +4,7 @@ Brannigan::Examples - Example schemes, input and output for Brannigan.
 
 =head1 VERSION
 
-version 0.7
+version 0.8
 
 =head1 DESCRIPTION
 

@@ -1,6 +1,6 @@
 package Brannigan::Validations;
 BEGIN {
-  $Brannigan::Validations::VERSION = '0.7';
+  $Brannigan::Validations::VERSION = '0.8';
 }
 
 use strict;
@@ -12,7 +12,7 @@ Brannigan::Validations - Built-in validation methods for Brannigan.
 
 =head1 VERSION
 
-version 0.7
+version 0.8
 
 =head1 DESCRIPTION
 
