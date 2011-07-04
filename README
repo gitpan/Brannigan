@@ -3,7 +3,7 @@ NAME
     input, mainly targeted at web applications.
 
 VERSION
-    version 0.8
+    version 0.9
 
 SYNOPSIS
     This example uses Catalyst, but should be pretty self explanatory. It's
@@ -692,14 +692,19 @@ DESCRIPTION
                         }
                 }
 
+  BUILT-IN VALIDATION METHODS
+    As mentioned earlier, Brannigan comes with a set of built-in validation
+    methods which are most common and useful everywhere. For a list of all
+    validation methods provided by Brannigan, check Brannigan::Validations.
+
   CROSS-SCHEME CUSTOM VALIDATION METHODS
-    The custom "validate" methods are nice, but when you want to use the
-    same custom validation method in different places inside your scheme, or
-    more likely in different schemes altogether, repeating the definition of
-    each custom scheme in every place you want to use it is not very
-    comfortable. Brannigan provides a simple mechanism to create custom,
-    named validation methods that can be used across schemes as if they were
-    internal methods.
+    Custom "validate" methods are nice, but when you want to use the same
+    custom validation method in different places inside your scheme, or more
+    likely in different schemes altogether, repeating the definition of each
+    custom method in every place you want to use it is not very comfortable.
+    Brannigan provides a simple mechanism to create custom, named validation
+    methods that can be used across schemes as if they were internal
+    methods.
 
     The process is simple: when creating your schemes, give the names of the
     custom validation methods and their relevant supplement values as with
@@ -788,10 +793,6 @@ DESCRIPTION
 
     Example schemes, input and output can be seen in Brannigan::Examples.
 
-  BUILT-IN VALIDATION METHODS
-    For a list of all validation methods provided by Brannigan, check
-    Brannigan::Validations.
-
 METHODS
   new( \%scheme | @schemes )
     Creates a new instance of Brannigan, with the provided scheme(s) (see
@@ -863,7 +864,11 @@ IDEAS FOR THE FUTURE
     *   Something to aid rejects traversal
 
         Find something that would make traversal of the rejects list easier
-        or whatever.
+        or whatever. Plus, printing the name of the validation method and
+        its supplement values in the rejects list isn't always a good idea.
+        For example, if we use the "one_of()" validation method with a big
+        list of say 100 options, our rejects list will contain all these 100
+        options, and that's not nice. So, think about something there.
 
 SEE ALSO
     Brannigan::Validations, Brannigan::Tree, Brannigan::Examples.

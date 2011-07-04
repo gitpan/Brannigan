@@ -2,9 +2,9 @@
 use strict;
 use warnings;
 
-BEGIN { require 5.006; }
+use 5.006;
 
-use ExtUtils::MakeMaker 6.31;
+use ExtUtils::MakeMaker 6.30;
 
 
 
@@ -15,14 +15,14 @@ my %WriteMakefileArgs = (
     'Test::More' => '0'
   },
   'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.31'
+    'ExtUtils::MakeMaker' => '6.30'
   },
   'DISTNAME' => 'Brannigan',
   'EXE_FILES' => [],
   'LICENSE' => 'perl',
   'NAME' => 'Brannigan',
   'PREREQ_PM' => {},
-  'VERSION' => '0.8',
+  'VERSION' => '0.9',
   'test' => {
     'TESTS' => 't/*.t'
   }

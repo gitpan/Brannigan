@@ -5,9 +5,9 @@ author:
 build_requires:
   Test::More: 0
 configure_requires:
-  ExtUtils::MakeMaker: 6.31
+  ExtUtils::MakeMaker: 6.30
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.101900, CPAN::Meta::Converter version 2.101670'
+generated_by: 'Dist::Zilla version 4.200008, CPAN::Meta::Converter version 2.110440'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -16,6 +16,6 @@ name: Brannigan
 requires:
   perl: 5.006
 resources:
-  homepage: http://github.com/ido50/Brannigan/tree
-  repository: git://github.com/ido50/Brannigan.git
-version: 0.8
+  homepage: http://github.com/ido50/Brannigan
+  repository: http://github.com/ido50/Brannigan
+version: 0.9
