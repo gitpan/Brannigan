@@ -9,22 +9,25 @@ use ExtUtils::MakeMaker 6.30;
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'Comprehensive, flexible system for validating and parsing input, mainly targeted at web applications.',
-  'AUTHOR' => 'Ido Perlmuter <ido@ido50.net>',
-  'BUILD_REQUIRES' => {
-    'Test::More' => '0'
+  "ABSTRACT" => "Comprehensive, flexible system for validating and parsing input, mainly targeted at web applications.",
+  "AUTHOR" => "Ido Perlmuter <ido\@ido50.net>",
+  "BUILD_REQUIRES" => {
+    "Test::More" => 0
   },
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.30'
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30"
   },
-  'DISTNAME' => 'Brannigan',
-  'EXE_FILES' => [],
-  'LICENSE' => 'perl',
-  'NAME' => 'Brannigan',
-  'PREREQ_PM' => {},
-  'VERSION' => '0.9',
-  'test' => {
-    'TESTS' => 't/*.t'
+  "DISTNAME" => "Brannigan",
+  "EXE_FILES" => [],
+  "LICENSE" => "perl",
+  "NAME" => "Brannigan",
+  "PREREQ_PM" => {
+    "strict" => 0,
+    "warnings" => 0
+  },
+  "VERSION" => "1.0",
+  "test" => {
+    "TESTS" => "t/*.t"
   }
 );
 
