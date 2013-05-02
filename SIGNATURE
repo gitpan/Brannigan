@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.69.
+signed via the Module::Signature module, version 0.70.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,31 +14,31 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA256
 
-SHA1 78e162422115e05823488c78c53bfa2e1a8b8061 Changes
+SHA1 d578ad140735d7b2439632ca87a7172bf04b5421 Changes
 SHA1 7093d94dc0d3b7495938247016eeaabd015995f0 INSTALL
 SHA1 4dceae0eaef7a9ac83dea9d378c954bfce55223a LICENSE
 SHA1 567957868415556d950a971fc40a835b6e42510f MANIFEST
 SHA1 11801d2e49e252c228231c40c1dd74bc4f3539c2 MANIFEST.SKIP
-SHA1 5e1f654b6790f21ddfb6fdf689f97849f299689a META.json
-SHA1 582cf3194be27240f36a6a5c12fc8f6f6321c83e META.yml
-SHA1 6a3b56d0a347288238e043066d75bb0f49bd4107 Makefile.PL
-SHA1 9e0021f0cfd425b65cca864973e5a25a2541e335 README
+SHA1 85e32644d2efcf1ae30253500b65497a87ef7dde META.json
+SHA1 5cff05f2ee63c1a4b3a92096892acc1275f202f9 META.yml
+SHA1 b0cb0cd278723837d0ceebbec3cdd462c5821773 Makefile.PL
+SHA1 fe26d8223f4f5a0242670560be021a3a4e7861d4 README
 SHA1 937d89fbbde9c059b988425e30a6f89aa0255761 dist.ini
-SHA1 12d8e324bf1608cae01e5c280bee9a83519ffc3c lib/Brannigan.pm
-SHA1 6f57191bf622a0b84563519abd9fc88b6d04ab81 lib/Brannigan/Examples.pod
-SHA1 40d9e402cad5a3d29fb0790e063837e0f712c15a lib/Brannigan/Tree.pm
-SHA1 53f8eb34c239775905abe98ab2b0cf0bfc4fccd2 lib/Brannigan/Validations.pm
+SHA1 4a26d44c0cb947e8127f92bf3c4f3973fa2fc3f1 lib/Brannigan.pm
+SHA1 e7f1e2f1dc4fd019340d51d6f6819c285d08aeac lib/Brannigan/Examples.pod
+SHA1 bf423ab73bc7b17341d10ee22d09a2c30c58d386 lib/Brannigan/Tree.pm
+SHA1 a43646b6ac6cb3374db3999cee879e90fa982f46 lib/Brannigan/Validations.pm
 SHA1 a2f2e5a4c96b075e7d4ba80c42664de2ae5ef302 t/00-load.t
 SHA1 89814eacbe1013a78da411edb51c88cde8de08d1 t/01-validations.t
 SHA1 5289c4282d85da9a5b317f218fdaeb1345f1ef30 t/02-simple.t
-SHA1 021547b055244e1b5601d9de11564826478e417e t/03-complex.t
+SHA1 9b484dbb12b71175b0f1dfbff546c704085c46d6 t/03-complex.t
 SHA1 87768d177f8c2e2df9c591cde869e7c8a245555e t/release-dist-manifest.t
 SHA1 9433c240fe590bc404ab68ff63984df763e347ed t/release-pod-coverage.t
 SHA1 b30cbdfaf935017c4568c0c91b242438cb87786e t/release-pod-syntax.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.19 (GNU/Linux)
 
-iF4EAREIAAYFAlD1s1kACgkQa4OHQAFM10dyBQD/bmK6V9uLiWii9uDqg+iPc4JC
-1q0jO1+umIsGq4GGozIBAKX8vap107TMkeZslmX3MP6yiYj2T33uPsEjMOCvfRsL
-=t6e9
+iF4EAREIAAYFAlGCs3sACgkQa4OHQAFM10cMbwD+NVoZ9uWOyL7oa2ngYG3nsvxo
+XjZrMde0ThnWH50s6x0A/0RAdKLNyUaQp0XLg1AQYztwA1Nc0joFRra4vd756rCX
+=nMA+
 -----END PGP SIGNATURE-----

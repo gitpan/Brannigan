@@ -1,6 +1,6 @@
 package Brannigan::Tree;
 
-our $VERSION = "1.0";
+our $VERSION = "1.1";
 $VERSION = eval $VERSION;
 
 use strict;
@@ -13,7 +13,7 @@ Brannigan::Tree - A Brannigan validation/parsing scheme tree, possibly built fro
 
 =head1 VERSION
 
-version 1.0
+version 1.1
 
 =head1 DESCRIPTION
 
@@ -22,7 +22,7 @@ validation/parsing scheme in its "final", workable structure, taking
 any inherited schemes into account. The actual validation and parsing
 of input is done by this module.
 
-=head1 MODULES
+=head1 CONSTRUCTOR
 
 =head2 new( $scheme | @schemes )
 
@@ -35,6 +35,8 @@ sub new {
 
 	return bless $class->_merge_trees(@_), $class;
 }
+
+=head1 OBJECT METHODS
 
 =head2 process( \%params )
 
@@ -54,7 +56,7 @@ sub process {
 	$data->{_rejects} = $rejects if $rejects;
 
 	my $prs = $self->parse($params, $self->{params}, $self->{groups});
-	foreach (keys %$prs) {
+	foreach (sort keys %$prs) {
 		$data->{$_} = $prs->{$_};
 	}
 
@@ -74,12 +76,12 @@ sub validate {
 	my $rejects;
 
 	# go over all the parameters and validate them
-	foreach (keys %$params) {
+	foreach (sort keys %$params) {
 		# find references to this parameter, first in regexes, then direct
 		# give preference to the direct references
 		my @references;
 		push(@references, $rules->{_all}) if $rules->{_all};
-		foreach my $param (keys %$rules) {
+		foreach my $param (sort keys %$rules) {
 			next unless $param =~ m!^/([^/]+)/$!;
 			my $re = qr/$1/;
 			push(@references, $rules->{$param}) if m/$re/;
@@ -92,7 +94,7 @@ sub validate {
 	}
 
 	# find required parameters that aren't there
-	foreach (keys %$rules) {
+	foreach (sort keys %$rules) {
 		next if $_ eq '_all';
 		next if m!^/[^/]+/$!;
 		$rejects->{$_} = ['required(1)'] if $rules->{$_}->{required} && (!defined $params->{$_} || $params->{$_} eq '');
@@ -116,7 +118,7 @@ sub parse {
 	my $data;
 
 	# fill-in missing parameters with default values, if defined
-	foreach (keys %$param_rules) {
+	foreach (sort keys %$param_rules) {
 		next if m!^/[^/]+/$!;
 		next unless !defined $params->{$_} || $params->{$_} eq '';
 
@@ -129,13 +131,13 @@ sub parse {
 	}
 
 	# parse the data
-	foreach (keys %$params) {
+	foreach (sort keys %$params) {
 		# ignore undefined or empty values
 		next if !defined $params->{$_} || $params->{$_} eq '';
 		
 		# is there a reference to this parameter in the scheme?
 		my @refs;
-		foreach my $p (keys %$param_rules) {
+		foreach my $p (sort keys %$param_rules) {
 			next unless $p =~ m!^/([^/]+)/$!;
 			my $re = qr/$1/;
 			next unless m/$re/;
@@ -153,7 +155,7 @@ sub parse {
 		# is this a hash-ref or an array-ref or just a scalar?
 		if (ref $params->{$_} eq 'HASH') {
 			my $pd = $self->parse($params->{$_}, $self->_merge_trees(@refs)->{keys});
-			foreach my $k (keys %$pd) {
+			foreach my $k (sort keys %$pd) {
 				$data->{$_}->{$k} = $pd->{$k};
 			}
 		} elsif (ref $params->{$_} eq 'ARRAY') {
@@ -168,7 +170,7 @@ sub parse {
 			# first see if there's one in a regex
 			my $parse;
 			my @data = ($params->{$_});
-			foreach my $r (keys %$param_rules) {
+			foreach my $r (sort keys %$param_rules) {
 				next unless $r =~ m!^/([^/]+)/$!;
 				my $re = qr/$1/;
 				
@@ -183,9 +185,9 @@ sub parse {
 			# make sure if we have a parse method that is indeed a subroutine
 			if ($parse && ref $parse eq 'CODE') {
 				my $parsed = $parse->(@data);
-				foreach my $k (keys %$parsed) {
+				foreach my $k (sort keys %$parsed) {
 					if (ref $parsed->{$k} eq 'HASH') {
-						foreach my $sk (keys %{$parsed->{$k}}) {
+						foreach my $sk (sort keys %{$parsed->{$k}}) {
 							$data->{$k}->{$sk} = $parsed->{$k}->{$sk};
 						}
 					} elsif (ref $parsed->{$k} eq 'ARRAY') {
@@ -203,7 +205,7 @@ sub parse {
 
 	# parse group data
 	if ($group_rules) {
-		foreach (keys %$group_rules) {
+		foreach (sort keys %$group_rules) {
 			my @data;
 			
 			# do we have a list of parameters, or a regular expression?
@@ -215,7 +217,7 @@ sub parse {
 				my ($re) = ($group_rules->{$_}->{regex} =~ m!^/([^/]+)/$!);
 				next unless $re;
 				$re = qr/$re/;
-				foreach my $p (keys %$data) {
+				foreach my $p (sort keys %$data) {
 					next unless $p =~ m/$re/;
 					push(@data, $data->{$p});
 				}
@@ -226,11 +228,11 @@ sub parse {
 			
 			# parse the data
 			my $parsed = $group_rules->{$_}->{parse}->(@data);
-			foreach my $k (keys %$parsed) {
+			foreach my $k (sort keys %$parsed) {
 				if (ref $parsed->{$k} eq 'ARRAY') {
 					push(@{$data->{$k}}, @{$parsed->{$k}});
 				} elsif (ref $parsed->{$k} eq 'HASH') {
-					foreach my $sk (keys %{$parsed->{$k}}) {
+					foreach my $sk (sort keys %{$parsed->{$k}}) {
 						$data->{$k}->{$sk} = $parsed->{$k}->{$sk};
 					}
 				} else {
@@ -243,27 +245,27 @@ sub parse {
 	return $data;
 }
 
-=head1 INTERNAL METHODS
+#############################
+##### INTERNAL METHODS ######
+#############################
 
-=head2 _validate_param( $param, $value, \%validations )
-
-Receives the name of a parameter, its value, and a hash-ref of validations
-to assert against. Returns a list of validations that failed for this
-parameter. Depending on the type of the parameter (either scalar, hash
-or array), this method will call one of the following three methods.
-
-=cut
+# _validate_param( $param, $value, \%validations )
+# ------------------------------------------------
+# Receives the name of a parameter, its value, and a hash-ref of validations
+# to assert against. Returns a list of validations that failed for this
+# parameter. Depending on the type of the parameter (either scalar, hash
+# or array), this method will call one of the following three methods.
 
 sub _validate_param {
 	my ($self, $param, $value, $validations) = @_;
 
 	# is there any reference to this parameter in the scheme?
-	return undef unless $validations;
+	return unless $validations;
 
 	# is this parameter required? if not, and it has no value
 	# (either undef or an empty string), then don't bother checking
 	# any validations. If yes, and it has no value, do the same.
-	return undef if !$validations->{required} && (!defined $value || $value eq '');
+	return if !$validations->{required} && (!defined $value || $value eq '');
 	return ['required(1)'] if $validations->{required} && (!defined $value || $value eq '');
 
 	# is this parameter forbidden? if yes, and it has a value,
@@ -280,14 +282,12 @@ sub _validate_param {
 	}
 }
 
-=head2 _validate_scalar( $param, $value, \%validations, [$type] )
-
-Receives the name of a parameter, its value, and a hash-ref of validations
-to assert against. Returns a list of all failed validations for this
-parameter. If the parameter is a child of a hash/array parameter, then
-C<$type> must be provided with either 'hash' or 'array'.
-
-=cut
+# _validate_scalar( $param, $value, \%validations, [$type] )
+# ----------------------------------------------------------
+# Receives the name of a parameter, its value, and a hash-ref of validations
+# to assert against. Returns a list of all failed validations for this
+# parameter. If the parameter is a child of a hash/array parameter, then
+# C<$type> must be provided with either 'hash' or 'array'.
 
 sub _validate_scalar {
 	my ($self, $param, $value, $validations, $type) = @_;
@@ -295,7 +295,7 @@ sub _validate_scalar {
 	my @rejects;
 
 	# get all validations we need to perform
-	foreach my $v (keys %$validations) {
+	foreach my $v (sort keys %$validations) {
 		# skip the parse method and the default value
 		next if $v eq 'parse' || $v eq 'default';
 		next if $type && $type eq 'array' && $v eq 'values';
@@ -321,13 +321,11 @@ sub _validate_scalar {
 	return scalar @rejects ? [@rejects] : undef;
 }
 
-=head2 _validate_array( $param, $value, \%validations )
-
-Receives the name of an array parameter, its value, and a hash-ref of validations
-to assert against. Returns a list of validations that failed for this
-parameter.
-
-=cut
+# _validate_array( $param, $value, \%validations )
+# ------------------------------------------------
+# Receives the name of an array parameter, its value, and a hash-ref of validations
+# to assert against. Returns a list of validations that failed for this
+# parameter.
 
 sub _validate_array {
 	my ($self, $param, $value, $validations) = @_;
@@ -351,13 +349,11 @@ sub _validate_array {
 	return scalar keys %$rejects ? $rejects : undef;
 }
 
-=head2 _validate_hash( $param, $value, \%validations )
-
-Receives the name of a hash parameter, its value, and a hash-ref of validations
-to assert against. Returns a list of validations that failed for this
-parameter.
-
-=cut
+# _validate_hash( $param, $value, \%validations )
+# -----------------------------------------------
+# Receives the name of a hash parameter, its value, and a hash-ref of validations
+# to assert against. Returns a list of validations that failed for this
+# parameter.
 
 sub _validate_hash {
 	my ($self, $param, $value, $validations) = @_;
@@ -373,25 +369,23 @@ sub _validate_hash {
 	# invoke validations on the keys of the hash (a.k.a mini-params)
 	my $hr = $self->validate($value, $validations->{keys});
 
-	foreach (keys %$hr) {
+	foreach (sort keys %$hr) {
 		$rejects->{$_} = $hr->{$_};
 	}
 
 	return scalar keys %$rejects ? $rejects : undef;
 }
 
-=head2 _merge_trees( @trees )
-
-Merges two or more hash-refs of validation/parsing trees and returns the
-resulting tree. The merge is performed in order, so trees later in the
-array (i.e. on the right) "tramp" the trees on the left.
-
-=cut
+# _merge_trees( @trees )
+# ----------------------
+# Merges two or more hash-refs of validation/parsing trees and returns the
+# resulting tree. The merge is performed in order, so trees later in the
+# array (i.e. on the right) "tramp" the trees on the left.
 
 sub _merge_trees {
 	my $class = shift;
 
-	return undef unless scalar @_ && (ref $_[0] eq 'HASH' || ref $_[0] eq 'Brannigan::Tree');
+	return unless scalar @_ && (ref $_[0] eq 'HASH' || ref $_[0] eq 'Brannigan::Tree');
 
 	# the leftmost tree is the starting tree
 	my $tree = shift;
@@ -401,7 +395,7 @@ sub _merge_trees {
 	foreach (@_) {
 		next unless ref $_ eq 'HASH';
 
-		foreach my $k (keys %$_) {
+		foreach my $k (sort keys %$_) {
 			if (ref $_->{$k} eq 'HASH') {
 				unless (exists $tree{$k}) {
 					$tree{$k} = $_->{$k};

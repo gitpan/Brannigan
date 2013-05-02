@@ -2,7 +2,7 @@ package Brannigan;
 
 # ABSTRACT: Comprehensive, flexible system for validating and parsing input, mainly targeted at web applications.
 
-our $VERSION = "1.0";
+our $VERSION = "1.1";
 $VERSION = eval $VERSION;
 
 use warnings;
@@ -15,7 +15,7 @@ Brannigan - Comprehensive, flexible system for validating and parsing input, mai
 
 =head1 VERSION
 
-version 1.0
+version 1.1
 
 =head1 SYNOPSIS
 
@@ -834,7 +834,7 @@ any errors. It's your job to decide what to do, and that's a good thing.
 
 Example schemes, input and output can be seen in L<Brannigan::Examples>.
 
-=head1 METHODS
+=head1 CONSTRUCTOR
 
 =head2 new( \%scheme | @schemes )
 
@@ -850,6 +850,8 @@ sub new {
 
 	return bless $self, $class;
 }
+
+=head1 OBJECT METHODS
 
 =head2 add_scheme( \%scheme | @schemes )
 
@@ -886,7 +888,7 @@ Same as above, but takes a scheme hash-ref instead of a name hash-ref. That
 basically gives you a functional interface for Brannigan, so you don't have
 to go through the regular object oriented interface. The only downsides to this
 are that you cannot define custom validations using the C<custom_validation()>
-method (defined below) and that your scheme must standalone (it cannot inherit
+method (defined below) and that your scheme must be standalone (it cannot inherit
 from other schemes). Note that when directly passing a scheme, you don't need
 to give the scheme a name.
 
@@ -928,16 +930,16 @@ sub custom_validation {
 	return 1;
 }
 
-=head1 INTERNAL METHODS
+############################
+##### INTERNAL METHODS #####
+############################
 
-=head2 _build_tree( $scheme, [ \%custom_validations ] )
-
-Builds the final "tree" of validations and parsing methods to be performed
-on the parameters hash during processing. Optionally receives a hash-ref
-of cross-scheme custom validation methods defined in the Brannigan object
-(see L</"CROSS-SCHEME CUSTOM VALIDATION METHODS"> for more info).
-
-=cut
+# _build_tree( $scheme, [ \%custom_validations ] )
+# ------------------------------------------------
+# Builds the final "tree" of validations and parsing methods to be performed
+# on the parameters hash during processing. Optionally receives a hash-ref
+# of cross-scheme custom validation methods defined in the Brannigan object
+# (see L</"CROSS-SCHEME CUSTOM VALIDATION METHODS"> for more info).
 
 sub _build_tree {
 	my ($self, $scheme, $customs) = @_;
@@ -1052,7 +1054,7 @@ L<http://search.cpan.org/dist/Brannigan/>
 
 =head1 ACKNOWLEDGEMENTS
 
-Brannigan is inspired by L<Oogly> (Al Newkirk) and the "Ketchup" jQuery
+Brannigan was inspired by L<Oogly> (Al Newkirk) and the "Ketchup" jQuery
 validation plugin (L<http://demos.usejquery.com/ketchup-plugin/>).
 
 =head1 LICENSE AND COPYRIGHT

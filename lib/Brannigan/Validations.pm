@@ -1,6 +1,6 @@
 package Brannigan::Validations;
 
-our $VERSION = "1.0";
+our $VERSION = "1.1";
 $VERSION = eval $VERSION;
 
 use strict;
@@ -12,7 +12,7 @@ Brannigan::Validations - Built-in validation methods for Brannigan.
 
 =head1 VERSION
 
-version 1.0
+version 1.1
 
 =head1 DESCRIPTION
 
